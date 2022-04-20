@@ -41,9 +41,8 @@ impl<T: Ord> Interval<T> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Relation {
-    Unknown,
     Before,
     Meets,
     Overlaps,
@@ -75,7 +74,65 @@ impl Relation {
             Self::Overlaps => Self::OverlappedBy,
             Self::StartedBy => Self::Starts,
             Self::Starts => Self::StartedBy,
-            _ => Self::Unknown,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Interval, Relation};
+
+    #[test]
+    fn test_interval_new() {
+        let interval = Interval::new(1, 2);
+        assert_eq!(interval.lesser, 1);
+        assert_eq!(interval.greater, 2);
+    }
+
+    #[test]
+    fn test_relate() {
+        let y = Interval::new(4, 8);
+        assert_eq!(Relation::Before, Interval::new(1, 3).relate(&y));
+        assert_eq!(Relation::Meets, Interval::new(2, 4).relate(&y));
+        assert_eq!(Relation::Overlaps, Interval::new(3, 5).relate(&y));
+        assert_eq!(Relation::FinishedBy, Interval::new(3, 8).relate(&y));
+        assert_eq!(Relation::Contains, Interval::new(3, 9).relate(&y));
+        assert_eq!(Relation::Starts, Interval::new(4, 6).relate(&y));
+        assert_eq!(Relation::Equal, Interval::new(4, 8).relate(&y));
+        assert_eq!(Relation::StartedBy, Interval::new(4, 9).relate(&y));
+        assert_eq!(Relation::During, Interval::new(5, 7).relate(&y));
+        assert_eq!(Relation::Finishes, Interval::new(6, 8).relate(&y));
+        assert_eq!(Relation::OverlappedBy, Interval::new(7, 9).relate(&y));
+        assert_eq!(Relation::MetBy, Interval::new(8, 10).relate(&y));
+        assert_eq!(Relation::After, Interval::new(9, 11).relate(&y));
+    }
+
+    #[test]
+    fn test_is_empty() {
+        assert_eq!(Interval::new(1, 1).is_empty(), true);
+        assert_eq!(Interval::new(1, 2).is_empty(), false);
+    }
+
+    #[test]
+    fn test_is_non_empty() {
+        assert_eq!(Interval::new(1, 1).is_non_empty(), false);
+        assert_eq!(Interval::new(1, 2).is_non_empty(), true);
+    }
+
+    #[test]
+    fn test_invert() {
+        assert_eq!(Relation::Before, Relation::After.invert());
+        assert_eq!(Relation::After, Relation::Before.invert());
+        assert_eq!(Relation::During, Relation::Contains.invert());
+        assert_eq!(Relation::Contains, Relation::During.invert());
+        assert_eq!(Relation::Equal, Relation::Equal.invert());
+        assert_eq!(Relation::Finishes, Relation::FinishedBy.invert());
+        assert_eq!(Relation::FinishedBy, Relation::Finishes.invert());
+        assert_eq!(Relation::MetBy, Relation::Meets.invert());
+        assert_eq!(Relation::Meets, Relation::MetBy.invert());
+        assert_eq!(Relation::Overlaps, Relation::OverlappedBy.invert());
+        assert_eq!(Relation::OverlappedBy, Relation::Overlaps.invert());
+        assert_eq!(Relation::Starts, Relation::StartedBy.invert());
+        assert_eq!(Relation::StartedBy, Relation::Starts.invert());
     }
 }
