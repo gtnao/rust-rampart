@@ -1,5 +1,7 @@
 # rust-rampart
 
+[![test](https://github.com/gtnao0219/rust-rampart/actions/workflows/test.yml/badge.svg)](https://github.com/gtnao0219/rust-rampart/actions/workflows/test.yml)
+
 Rust implementation of the [Haskell Rampart library](https://github.com/tfausak/rampart) by [Taylor Fausak](https://taylor.fausak.me/2020/03/13/relate-intervals-with-rampart).
 
 ## Usage
